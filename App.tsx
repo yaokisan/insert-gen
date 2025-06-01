@@ -1,7 +1,6 @@
-
 import React, { useState, useCallback } from 'react';
-import type { ImageIdea } from './types';
-import { AppState } from './types';
+import type { ImageIdea, AspectRatio } from './types';
+import { AppState, ASPECT_RATIOS } from './types';
 import TranscriptInputSection from './components/TranscriptInputSection';
 import ImageIdeasSection from './components/ImageIdeasSection';
 import { generateInitialImagePrompts, refineImagePrompt, generateImageWithImagen } from './services/geminiService';
@@ -23,15 +22,19 @@ const App: React.FC = () => {
   const [imageIdeas, setImageIdeas] = useState<ImageIdea[]>([]);
   const [appState, setAppState] = useState<AppState>(AppState.Idle);
   const [overallError, setOverallError] = useState<string | null>(null);
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(ASPECT_RATIOS[0]);
   // Store initial user inputs for the "Start Over" functionality to optionally reset to these
   const [initialUserTranscript, setInitialUserTranscript] = useState<string>('');
   const [initialUserImageCount, setInitialUserImageCount] = useState<number>(3);
+  const [initialUserAspectRatio, setInitialUserAspectRatio] = useState<AspectRatio>(ASPECT_RATIOS[0]);
 
 
-  const handleGetIdeas = useCallback(async (currentTranscript: string, count: number) => {
+  const handleGetIdeas = useCallback(async (currentTranscript: string, count: number, aspectRatio: AspectRatio) => {
     setTranscript(currentTranscript);
+    setSelectedAspectRatio(aspectRatio);
     setInitialUserTranscript(currentTranscript); 
-    setInitialUserImageCount(count);      
+    setInitialUserImageCount(count);
+    setInitialUserAspectRatio(aspectRatio);      
 
     setAppState(AppState.LoadingInitialIdeas);
     setOverallError(null);
@@ -47,6 +50,7 @@ const App: React.FC = () => {
         isRefiningPrompt: false,
         isGeneratingImage: false,
         error: null,
+        aspectRatio: aspectRatio,
       }));
       setImageIdeas(newIdeas);
       setAppState(AppState.IdeasLoaded);
@@ -109,7 +113,7 @@ const App: React.FC = () => {
     );
 
     try {
-      const imageUrl = await generateImageWithImagen(ideaToGenerate.prompt);
+      const imageUrl = await generateImageWithImagen(ideaToGenerate.prompt, ideaToGenerate.aspectRatio);
       setImageIdeas(prevIdeas =>
         prevIdeas.map(idea =>
           idea.id === id ? { ...idea, imageUrl, isGeneratingImage: false, error: null } : idea
@@ -139,7 +143,7 @@ const App: React.FC = () => {
 
     const imageGenerationPromises = imageIdeas.map(async (idea) => {
       try {
-        const imageUrl = await generateImageWithImagen(idea.prompt);
+        const imageUrl = await generateImageWithImagen(idea.prompt, idea.aspectRatio);
         return { id: idea.id, imageUrl, error: null };
       } catch (error) {
         console.error(`Failed to generate image for idea ${idea.id}:`, error);
@@ -173,6 +177,8 @@ const App: React.FC = () => {
     setTranscript(''); 
     setInitialUserTranscript('');
     setInitialUserImageCount(3);
+    setInitialUserAspectRatio(ASPECT_RATIOS[0]);
+    setSelectedAspectRatio(ASPECT_RATIOS[0]);
 
     setImageIdeas([]);
     setAppState(AppState.Idle);
@@ -197,7 +203,8 @@ const App: React.FC = () => {
           onGetIdeas={handleGetIdeas}
           isLoading={appState === AppState.LoadingInitialIdeas}
           initialTranscript={initialUserTranscript} 
-          initialImageCount={initialUserImageCount} 
+          initialImageCount={initialUserImageCount}
+          initialAspectRatio={initialUserAspectRatio}
         />
 
         {(appState !== AppState.Idle || imageIdeas.length > 0) && (

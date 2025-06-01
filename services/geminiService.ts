@@ -1,4 +1,5 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import type { AspectRatio } from '../types';
 // import type { ImageIdea } from '../types'; // Not used directly in this file
 
 // Ensure API_KEY is available. In a real app, you'd have a more robust check or build-time error.
@@ -109,13 +110,18 @@ export const refineImagePrompt = async (transcript: string, currentPrompt: strin
   }
 };
 
-export const generateImageWithImagen = async (prompt: string): Promise<string> => {
+export const generateImageWithImagen = async (prompt: string, aspectRatio: AspectRatio): Promise<string> => {
   const fullPrompt = `${prompt}, high detail, sharp focus, professional photography, cinematic lighting, 8k`;
+  
   try {
     const response = await ai.models.generateImages({
       model: IMAGE_MODEL_NAME,
       prompt: fullPrompt,
-      config: { numberOfImages: 1, outputMimeType: 'image/jpeg' },
+      config: { 
+        numberOfImages: 1, 
+        outputMimeType: 'image/jpeg',
+        aspectRatio: aspectRatio.value
+      },
     });
 
     if (response.generatedImages && response.generatedImages.length > 0 && response.generatedImages[0].image?.imageBytes) {

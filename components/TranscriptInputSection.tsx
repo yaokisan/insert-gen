@@ -1,22 +1,25 @@
-
 import React, { useState }  from 'react';
 import Spinner from './Spinner';
+import { AspectRatio, ASPECT_RATIOS } from '../types';
 
 interface TranscriptInputSectionProps {
-  onGetIdeas: (transcript: string, count: number) => void;
+  onGetIdeas: (transcript: string, count: number, aspectRatio: AspectRatio) => void;
   isLoading: boolean;
   initialTranscript?: string;
   initialImageCount?: number;
+  initialAspectRatio?: AspectRatio;
 }
 
 const TranscriptInputSection: React.FC<TranscriptInputSectionProps> = ({ 
   onGetIdeas, 
   isLoading,
   initialTranscript = "",
-  initialImageCount = 3 
+  initialImageCount = 3,
+  initialAspectRatio = ASPECT_RATIOS[0]
 }) => {
   const [transcript, setTranscript] = useState<string>(initialTranscript);
   const [imageCount, setImageCount] = useState<number>(initialImageCount);
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(initialAspectRatio);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = () => {
@@ -29,7 +32,7 @@ const TranscriptInputSection: React.FC<TranscriptInputSectionProps> = ({
       setError("画像枚数は3枚から30枚の間で指定してください。");
       return;
     }
-    onGetIdeas(transcript, imageCount);
+    onGetIdeas(transcript, imageCount, selectedAspectRatio);
   };
 
   return (
@@ -69,6 +72,41 @@ const TranscriptInputSection: React.FC<TranscriptInputSectionProps> = ({
           disabled={isLoading}
           aria-required="true"
         />
+      </div>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-300 mb-3">
+          画像のアスペクト比
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {ASPECT_RATIOS.map((ratio) => (
+            <div
+              key={ratio.value}
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                selectedAspectRatio.value === ratio.value
+                  ? 'border-indigo-500 bg-indigo-600/20 text-indigo-300'
+                  : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-600'
+              }`}
+              onClick={() => !isLoading && setSelectedAspectRatio(ratio)}
+            >
+              <div className="text-center">
+                <div className="font-semibold text-lg mb-1">{ratio.label}</div>
+                <div className="text-sm opacity-80 mb-2">{ratio.description}</div>
+                <div 
+                  className={`mx-auto border-2 ${
+                    selectedAspectRatio.value === ratio.value ? 'border-indigo-400' : 'border-gray-400'
+                  }`}
+                  style={{
+                    width: `${Math.min(60, 60 * (ratio.width / ratio.height))}px`,
+                    height: `${Math.min(60, 60 * (ratio.height / ratio.width))}px`,
+                    maxWidth: '60px',
+                    maxHeight: '60px'
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <button

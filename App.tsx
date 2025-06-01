@@ -193,7 +193,7 @@ const App: React.FC = () => {
           AIインサート画像ジェネレーター
         </h1>
         <p className="mt-3 text-lg text-gray-400 max-w-2xl mx-auto">
-          魅力的なビジュアルストーリーを作成します。コンテンツの文字起こしを入力し、AIによる画像案を取得、調整し、リアルで高品質な画像を生成します。
+          文字起こしの全文を入力すれば、それに合ったリアルなインサート画像を自動で一括生成します。APIは自前なので、もし本格的に使いたい場合は<a href="https://github.com/yaokisan/insert-gen" className="text-indigo-400 hover:text-indigo-300 underline">https://github.com/yaokisan/insert-gen</a>よりクローンしてお使いください！
         </p>
       </header>
       

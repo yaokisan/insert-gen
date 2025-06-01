@@ -234,7 +234,7 @@ const App: React.FC = () => {
 
       <footer className="mt-16 pt-8 border-t border-gray-700 text-center">
         <p className="text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} AIインサート画像ジェネレーター. すべての権利予約済み。
+          &copy; {new Date().getFullYear()} AIインサート画像ジェネレーター
         </p>
       </footer>
     </div>
